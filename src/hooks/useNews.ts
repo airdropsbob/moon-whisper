@@ -35,14 +35,17 @@ export const useNews = () => {
               );
               const data = await res.json();
               if (data.status !== "ok") return [];
-              return (data.items as Array<Record<string, string>>).slice(0, 8).map((it) => ({
-                title: it.title,
-                link: it.link,
-                pubDate: it.pubDate,
-                description: stripHtml(it.description || "").slice(0, 220),
-                thumbnail: it.thumbnail || it.enclosure?.link,
+              return (data.items as Array<Record<string, unknown>>).slice(0, 8).map((it) => ({
+                title: String(it.title ?? ""),
+                link: String(it.link ?? ""),
+                pubDate: String(it.pubDate ?? ""),
+                description: stripHtml(String(it.description ?? "")).slice(0, 220),
+                thumbnail:
+                  (typeof it.thumbnail === "string" && it.thumbnail) ||
+                  ((it.enclosure as { link?: string } | undefined)?.link) ||
+                  undefined,
                 source: f.source,
-              }));
+              })) as NewsItem[];
             } catch {
               return [];
             }
